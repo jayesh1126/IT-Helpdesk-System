@@ -1,0 +1,420 @@
+<%
+function JSONout(input){
+   return JSON.parse(JSON.stringify(input))
+}
+
+
+
+
+
+
+%>
+<!DOCTYPE html>
+<html lang="en">
+<!--Navigation bar-->
+<div id="nav-placeholder"></div>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+  $(function(){
+    $("#nav-placeholder").load("navbar");
+  });
+</script>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <script src="bootstrap/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="stylesheets/modal.css">
+    <style>
+      .container {  display: grid;
+         grid-template-columns: 10% 40% 40% 10%;
+         grid-template-rows: 10% 10% 70%;
+         grid-auto-columns: 1r;
+         gap: 0px 0px;
+         grid-auto-flow: row;
+         grid-template-areas:
+            ". Header Header ."
+            ". Search Search ."
+            ". TableSection TableSection .";
+      }
+
+      .TableSection { grid-area: TableSection; }
+
+      .Search { grid-area: Search; }
+
+
+
+      .Header { grid-area: Header; }
+
+      th{
+         text-align: center;
+      }
+      td{
+        text-align: center;
+         width: 1000px;
+      }
+
+      table.scrolldown {
+         overflow-y: auto;
+         overflow-x: hidden;
+         height:100%;
+         display:block;
+
+      }
+
+
+
+      .container2 {  display: grid;
+         grid-template-columns: 25% 75%;
+         grid-template-rows: 60% 40%;
+         grid-auto-columns: 1fr;
+         gap: 0px 0px;
+         grid-auto-flow: row;
+         grid-template-areas:
+            "DetailsName Details"
+            "HistoryName History";
+      }
+
+      .DetailsName { grid-area: DetailsName; }
+
+      .HistoryName { grid-area: HistoryName; }
+
+      .Details { grid-area: Details; }
+
+      .History { grid-area: History; }
+
+      .container3 {  display: grid;
+         grid-template-columns: 30% 30% 30%;
+         grid-template-rows: 100%;
+         gap: 0% 5%;
+         grid-auto-flow: row;
+         grid-template-areas:
+            "SearchBox SearchButton NewSoftware";
+      }
+
+      .SearchBox { grid-area: SearchBox; }
+
+      .SearchButton { grid-area: SearchButton; }
+
+      .NewSoftware { grid-area: NewSoftware; }
+
+
+
+
+
+
+      body{background-color: #9b9a9a;}
+
+      .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+         background-color: #d3d3d3 !important;
+      }
+      .table-striped > tbody > tr:nth-child(2n) > td, .table-striped > tbody > tr:nth-child(2n) > th {
+         background-color: #dfdfdf !important;
+      }
+      .shadow{
+         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+              -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+              -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+              border-radius: 5px;
+      }
+   </style>
+
+
+<!-- WEB PAGE CODE -->
+<body class="container" style="height: 950px;" >
+
+   <div class="Header">
+      <br>
+      <h1 style="text-align: center;">Software</h1>
+   </div>
+   <div class="Search">
+      <div class="container3 ">
+
+
+
+               <div class="SearchBox" >
+                  <form action method="post">
+                  <input  class="form-control" style="width:100%;background-color: #dfdfdf; height:38px;" id="searchInput" placeholder="Search"name = "Search" type="text"  value="<%- locals.search %>">
+               </div>
+               <div class="SearchButton" >
+                  <input  class="btn " style="width:100%; background-color: #f0bb00;" type="submit" value="Search">
+               </form>
+               </div>
+
+
+
+         <div class="NewSoftware" >
+            <button class="modal-two-btn btn " style="width:100%;background-color: #f0bb00;">New Software</button>
+         </div>
+      </div>
+   </div>
+
+
+   <div class="TableSection" >
+      <table  class='scrolldown  table table-striped shadow' style="border-radius:5px;" >
+
+         <tr>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Licence Number</th>
+            <th>More Info</th>
+         </tr>
+
+         <% for(var i=0; i<locals.data.length; i++){ %>
+            <tr>
+               <td><%- JSONout(locals.data[i]["SoftwareName"])  %></td>
+               <td><%- JSONout(locals.data[i]["SoftwareVersion"])  %></td>
+               <td><%- JSONout(locals.data[i]["LicenseNumber"])  %></td>
+               <td >
+                  <form action="" method="post">
+                     <input type="hidden" name="ModalClicked" value="true"></input>
+                     <input type="hidden" name="software_id" value="<%- JSONout(locals.data[i]["ID"]) %>"></input>
+                     <button name = 'ModalID' class = 'more-info-btn' value="<%-i%>">More Info</button>
+                  </form>
+               </td>
+            </tr>
+         <% } %>
+
+
+      </table>
+   </div>
+
+
+</body>
+<!-- END OF WEB PAGE CODE -->
+
+<div class="modal" id="modal-one">
+
+   <div class="modal-content">
+     <!-- Modal Header -->
+     <div class="modal-header">
+        <span class="close-btn">&times;</span>
+        <h4 class="modal-title">Software Information</h4>
+     </div>
+
+     <!-- Modal body -->
+     <div class="modal-body">
+        <div class="container2" style="height:100%;">
+
+               <div class="DetailsName " style="text-align: center;" >
+                  <h2><u>Software Details</u></h2>
+
+               </div>
+               <div class="Details">
+               <!-- This does the form input for the modal "extra info"-->
+                  <form action method="post">
+                     <table class="table table-striped">
+                        <tr>
+                           <th>Software Attribute</th>
+                           <th>Value</th>
+                        </tr>
+                        <tr>
+                           <td >Software ID: </td>
+                           <td ><%- JSONout(locals.data[locals.modalID]["ID"]) %></td>
+                        </tr>
+                        <tr>
+                           <td >Software Name: </td>
+                           <td ><input type="text" id="software_name" name="software_name" value="<%- JSONout(locals.data[locals.modalID]["SoftwareName"])  %>"></td>
+                        </tr>
+                        <tr>
+                           <td >Software Version: </td>
+                           <td >
+                              <input type="text" id="software_version" name="software_version" value="<%- JSONout(locals.data[locals.modalID]["SoftwareVersion"])  %>">
+
+                           </td>
+                        </tr>
+                        <tr>
+                           <td >License Number: </td>
+                           <td >
+                              <input type="text" id="license_number" name="license_number" value="<%- JSONout(locals.data[locals.modalID]["LicenseNumber"])  %>">
+
+                           </td>
+                        </tr>
+
+                     </table>
+
+                  <!--hidden variables for the form and identification-->
+                              <input type="hidden" name="software_id" value="<%- JSONout(locals.data[locals.modalID]["ID"]) %>">
+                              <input type="hidden" name="update" value="True">
+                              <div class="d-flex flex-column">
+                              <td colspan="2" style="width:100%" class = "table-submit"><button class = 'submit-btn' type="submit"  method="get">Submit</button></td>
+                           </div>
+                  </form>
+               </div>
+
+
+               <div class="HistoryName" style="text-align: center;">
+                  <h2><u>Problem History</u></h2>
+
+               </div>
+            <!--Display Problem History-->
+               <div class="History">
+                  <% if (locals.extraInfo != ""){ %>
+
+                  <table class="table scrolldown table-striped">
+                     <tr>
+                        <th>Problem Description</th>
+                        <th>Final Solution</th>
+                        <th>Ticket State</th>
+                        <th>Assigned Specialist ID</th>
+                     </tr>
+                     <% for(const item in locals.extraInfo){ %>
+                        <tr>
+                           <td><%- JSONout(locals.extraInfo[item]["TicketDescription"])  %></td>
+                           <td><%- JSONout(locals.extraInfo[item]["FinalSolution"]) || "Null" %></td>
+                           <td><%- JSONout(locals.extraInfo[item]["TicketState"])  %></td>
+                           <td><%- JSONout(locals.extraInfo[item]["AssignedSpecialistID"])  || "Null"%></td>
+                        </tr>
+                     <% } %>
+
+
+
+                  </table>
+                  <% }  else{ %>
+                     <h2>No Associated Problems</h2>
+                  <% } %>
+               </div>
+        </div>
+     </div>
+
+     <!-- Modal footer -->
+
+     <div class="modal-footer" >
+      <form action="" method="post">
+                  <input type="hidden" name="Delete" value="true"></input>
+                  <input type="hidden" name="software_id" value="<%- JSONout(locals.data[locals.modalID]["ID"]) %>"></input>
+                  <button name = 'delete-button' class = 'delete-btn' value="<%-i%>">Delete</button>
+         </form>
+     </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div class="modal" id="modal-two">
+   <div class="modal-content"; style = "height:42%">
+
+     <!-- Modal Header -->
+     <div class="modal-header"; style = "height:15%">
+       <span class="close-btn">&times;</span>
+       <br><br>
+       <h4 class="modal-title">New Software</h4>
+    </div>
+
+     <!-- Modal body -->
+     <div class="modal-body">
+       <form action method="post">
+          <table class="table table-striped">
+            <tr>
+            <th>Software Attribute</th>
+            <th>Value</th>
+            </tr>
+             <tr>
+                <td>Software ID:</td>
+                <% var IDs =[]
+                for (const item in locals.data){
+                   IDs.push(parseInt(locals.data[item]["ID"]))
+
+                }
+                IDs.sort()
+                var newID=0;
+                for (var n=0;n<IDs.length;n++){
+                   if(newID==IDs[n]){
+                      newID+=1
+                   }
+                }
+
+                %>
+
+
+                <td>
+                  <%- newID%>
+                </td>
+             </tr>
+             <tr>
+                <td>Software Name:</td>
+                <td><input type="text" id="software_name" name="software_name" placeholder="Name"> </td>
+             </tr>
+
+             <tr>
+                <td>Software Version:</td>
+                <td><input type="text"  id="software_version" name="software_version" value="Version"></td>
+             </tr>
+
+             <tr>
+                <td>Licence Number:</td>
+                <td><input type="text" id="license_number" name="license_number" value="LicenseNumber"></td>
+             </tr>
+
+            </table>
+
+            <input type="hidden" name="software_id" Value="<%- newID %>">
+            <input type="hidden" name="New" value="true">
+            <div class="d-flex flex-column">
+            <button class = 'submit-btn' type="submit">Submit</button>
+            </div>
+         </form>
+
+
+
+       <!-- Modal footer -->
+
+
+      </div>
+
+   </div>
+</div>
+
+
+
+
+<script>
+   //modal shiz
+   let modalBtn = document.getElementsByClassName("modal-one-btn")
+   let modal = document.getElementById('modal-one')
+   let closeBtn = document.querySelectorAll(".close-btn")
+
+   for (const btn of modalBtn){
+       btn.onclick = function(){
+           modal.style.display = "block"
+       }
+   }
+   var bob='<%-locals.modalClicked%>'
+
+   if (bob == "true"){
+      modal.style.display = "block"
+   }
+   let modalBtn2 = document.getElementsByClassName("modal-two-btn")
+   let modal2 = document.getElementById('modal-two')
+
+   for (const btn of modalBtn2){
+       btn.onclick = function(){
+           modal2.style.display = "block"
+       }
+   }
+   window.onclick = function(e){
+     if(e.target == modal2){
+       modal2.style.display = "none"
+     }else if(e.target == modal){
+       modal.style.display = "none"
+     }
+   }
+
+   for (const btn2 of closeBtn){
+       btn2.onclick = function(){
+           modal.style.display = "none"
+           modal2.style.display = "none"
+       }
+   }
+
+   </script>
+
+
+
+</html>

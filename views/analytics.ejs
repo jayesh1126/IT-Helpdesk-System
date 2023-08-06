@@ -1,0 +1,71 @@
+<%
+function JSONout(input){
+   return JSON.parse(JSON.stringify(input))
+}
+%>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  <style>
+     td{
+        text-align: center;
+     }
+
+     table,td,th{
+        padding: 10px;
+        border-collapse: collapse;
+        border: 1px solid;
+     }
+
+  </style>
+</head>
+<body>
+
+
+
+<!--end of Navigation bar-->
+<table>
+    <tr>
+        <th>Specialist ID</th>
+        <th>Full Name</th>
+        <th>Total Number of Tickets Assigened</th>
+        <th>Number of Tickets Resolved</th>
+        <th>Number of Tickets In Progress</th>
+        <th>Number of Tickets To Do</th>
+        <th>Number of Tickets In Review</th>
+        <th>Longest Ticket In To Do (Days)</th>
+        <th>Longest Ticket In Progress (Days)</th>
+
+     </tr>
+<% for(var i=0; i<locals.data.length; i++){ %>
+    <tr>
+       <td><%- JSONout(locals.data[i]["AssignedSpecialistID"])|| "Null"  %></td>
+       <td><%- JSONout(locals.data[i]["FullName"]) %></td>
+       <td><%- JSONout(locals.data[i]["Count"])     || 0%></td>
+       <td><%- JSONout(locals.data[i]["CountDone"]) || 0 %></td>
+       <td><%- JSONout(locals.data[i]["CountProg"]) || 0 %></td>
+       <td><%- JSONout(locals.data[i]["CountToDo"]) || 0 %></td>
+       <td><%- JSONout(locals.data[i]["CountRev"])  || 0 %></td>
+       <td><%- JSONout(locals.data[i]["LongestInProg"])  || "None" %></td>
+       <td><%- JSONout(locals.data[i]["LongestToDo"])  || "None" %></td>
+
+
+    </tr>
+ <% } %>
+</table>
+
+<!--Navigation bar-->
+<div id="nav-placeholder">
+
+</div>
+<script>
+$(function(){
+  $("#nav-placeholder").load("navbar");
+});
+</script>
+<%- locals.username%>
+</body>
+</html>

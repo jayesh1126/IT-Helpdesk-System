@@ -1,0 +1,57 @@
+<%-
+var sql = require("mssql");
+
+    // config for your database
+    var config = {
+        user: 'teamb006',
+        password: 'c0gjyXj0ZS',
+        server: 'localhost', 
+        database: 'teamb006' 
+    };
+
+    // connect to your database
+    sql.connect(config, function (err) {
+    
+        if (err) console.log(err);
+
+        // create Request object
+        var request = new sql.Request();
+           
+        // query to the database and get the records
+        request.query('select * from Software', function (err, recordset) {
+            
+            if (err) console.log(err)
+
+            // send records as a response
+            res.send(recordset);
+            
+        });
+
+
+
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('head'); %>
+</head>
+<body class="container">
+
+<header>
+  <%- include('header'); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <h1>This is great because <%= locals.text || 'text not defined' %> </h1>
+    <p>Welcome to templating using EJS</p>
+
+  </div>
+</main>
+
+<footer>
+  <%- include('footer'); %>
+</footer>
+
+</body>
+</html>

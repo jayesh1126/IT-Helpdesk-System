@@ -1,0 +1,611 @@
+<link rel="stylesheet" href="/ticket.css" type="text/css">
+<link rel="stylesheet" href="stylesheets/styles.css">
+
+<!DOCTYPE html>
+<html lang="en">
+
+<%
+isUser = true;
+userid = "";
+for(query in queries[2]){
+    if (queries[2][query].Username == username){
+        userid = queries[2][query].ID
+    }
+}
+for(query in queries[3]){
+    if (userid == queries[3][query].PersonID){
+        isUser = false;
+    }
+}
+console.log(isUser);
+console.log("userid: "+userid);
+%>
+
+<head>
+    <title>My Tickets</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="icon" href="images/logoTools.png">
+</head>
+
+<!--Navigation bar-->
+<div id="nav-placeholder">
+
+</div>
+<script>
+$(function(){
+  $("#nav-placeholder").load("navbar");
+});
+</script>
+
+
+<body>
+    <!-- Container for whole page -->
+    <div class="container-fluid">
+        <div class="main-row wrapper">
+            <!-- Navigation bar -->
+            <!-- <?php
+            include("navbar.php");
+            ?> -->
+            <main>
+                <div class="alertContainer"></div>
+                <center style="padding-top: 40px; font-size: xx-large; font-weight: bolder;">My Tickets List</center>
+
+                <div class="wrapper">
+                    <div class="third-row" id="create-button-col">
+                        <!-- Only show button if user is an operator -->
+                        <!-- <?php if ($_SESSION['deptName'] == "Operator") { ?> -->
+                        <!-- Open create ticket modal -->
+                        <button onclick="createTicket()" type="button" data-bs-toggle="modal"
+                            data-bs-target="#create-ticket-modal" style="margin-left: 50px;">
+                            Create ticket
+                        </button>
+                        <!-- <?php } ?> -->
+                    </div>
+
+            </div>
+
+                <!-- Create ticket modal -->
+                <div id="create-ticket-modal" class="modal fade" tabindex="-1">
+                    <div class="modal-dialog">
+                        <!-- Form that contains fields to input to the ticket database// action="ticket-list.php"-->
+                        <form id="create-form" name="create-form"  method="POST" action="/users/create-form"
+                            class="modal-form" onsubmit="return checkCreateForm(true);">
+                            <!-- Invisible field used for post back to same page -->
+                            <input type="hidden" name="form_type" value="create-ticket">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title">Create ticket</h3>
+                                    <button type="button" onclick="closeModal();" class="modal-close button-close"
+                                        data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                                </div>
+                                <hr>
+                                <div class="modal-body">
+                                    <div class="wrapper">
+                                        <!-- Ticket ID (automatically generated so cannot be edited) -->
+                                        <div class="half-row">
+                                            <label for="problemID">Ticket ID</label>
+                                            <!--Get the latest ticket ID-->
+                                            <%  biggestTicket=0;
+                                            for(query in queries[0]){
+
+                                                if(queries[0][query].ID>biggestTicket){
+                                                    biggestTicket=queries[0][query].ID;
+                                                }
+                                            }
+                                             %>
+                                            <input id="problemID" name="problemID" type="number" placeholder="" value=<%= biggestTicket+1 %>
+                                                required readonly="readonly">
+                                        </div>
+                                        <!-- Dropdown list of reporters to assign to the ticket -->
+                                        <div class="half-row">
+                                            <label for="viewReporterID">Reporter</label>
+                                            <div class="input-extended input-extended-right">
+                                                <select onchange="getPhoneNo(this);" id="viewReporternumb"
+                                                    name="reporterID" class="personnel-select "
+                                                    >
+                                                    <!-- Add all reporters from database as items to select -->
+                                                    <% for(query in queries[2]){ %>
+                                                    <option value= <%=queries[2][query].ID %>>
+                                                        <%= queries[2][query].FullName %>
+                                                    </option>
+                                                    <% } %>
+                                                </select>
+                                                <!-- Selected reporter phone number (not editable) -->
+                                                <label class="input-extension-right" for="reporterID"
+                                                    id="viewReporternumb"></label>
+                                            </div>
+                                        </div>
+                                        <!-- Dropdown list of priorities for the ticket -->
+                                        <div class="half-row">
+                                            <label for="ticketPriority">Priority</label>
+                                            <select id="ticketPriority" name="ticketPriority">
+                                                <option value=1>1 (Lowest)</option>
+                                                <option value=2>2</option>
+                                                <option value=3>3</option>
+                                                <option value=4>4</option>
+                                                <option value=5>5 (Highest)</option>
+                                            </select>
+                                        </div>
+                                        <!-- Dropdown list of problem types -->
+                                        <div class="half-row">
+                                            <label for="viewTypeID">Problem type</label>
+                                            <select onchange="addNewCreateType(this);" id="typeID" name="typeID">
+                                                <!-- Add all problem types from database to select as items -->
+                                                <% for(query in queries[1]){ %>
+                                                    <option value= <%=queries[1][query].ID %>>
+                                                        <%= queries[1][query].Problem %>
+                                                    </option>
+                                                    <% } %>
+                                            </select>
+                                        </div>
+                                        <!-- Textbox to add new problem Type -->
+                                        <div class="full-row newCreateTypeCol">
+                                            <label for="newCreateTypeText">New Type Explanation</label>
+                                            <input id="newCreateTypeText" name="newCreateTypeText" type="text"
+                                                placeholder="">
+                                        </div>
+                                        <!-- Dropdown list of operators -->
+                                        <%#
+                                        <div class="half-row">
+                                            <label for="operatorID">Phone Operator</label>
+                                            <select id="operatorID" name="operatorID">
+                                                <!-- Add all operators from database to select as items -->
+                                            </select>
+                                        </div>
+                                        %>
+                                        <!-- Dropdown list of specialists -->
+                                        <div class="full-row">
+                                            <label for="viewAssignedSpecialistID">Assigned Specialist</label>
+                                            <div class="input-extended input-extended-right">
+                                                <select onchange="getPhoneNo(this); addExternalSpecialist(this)"
+                                                    id="viewAssignedSpecialist" name="assignedSpecialistID"
+                                                    class="personnel-select ">
+                                                    <option selected value=0>Not assigned</option>
+                                                    <!-- Add all specialists from database as items to select -->
+                                                    <% for(query in queries[3]){ %>
+                                                    <option value=<%= queries[3][query].PersonID;%>>
+                                                        <% for(number in queries[2]){
+                                                            if(queries[3][query].PersonID == queries[2][number].ID){
+                                                                fullName = queries[2][number].FullName;
+                                                            }
+                                                        }
+                                                        for(number in queries[1]){
+                                                            if(queries[3][query].SpecialtyID == queries[1][number].ID){
+                                                                problemName = queries[1][number].Problem;
+                                                            }
+                                                        }
+                                                        workload = 0;
+                                                        for(number in queries[0]){
+                                                            if(queries[3][query].PersonID == queries[0][number].AssignedSpecialistID){
+                                                                workload += 1;
+                                                            }
+                                                        }%>
+                                                        <%= queries[3][query].PersonID %>)
+                                                        <%= fullName %> -
+                                                        <%= problemName %> -
+                                                        <%= workload %>
+                                                        <%= queries[3][query].Externality ? ' (External)' : '' %>
+                                                    </option>
+                                                    <% }%>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!-- Textbox to add new external specialist -->
+                                        <div class="full-row newCreateExternalSpecialistCol">
+                                            <div class="half-row">
+                                                <label for="newCreateExternalSpecialistText">New External Specialist
+                                                    Name</label>
+                                                <input id="newCreateExternalSpecialistText"
+                                                    name="newCreateExternalSpecialistText" type="text" placeholder="">
+                                            </div>
+                                            <div class="half-row">
+                                                <label for="newCreateExternalSpecialistPhoneNo">New External Specialist
+                                                    Phone No</label>
+                                                <input id="newCreateExternalSpecialistPhoneNo"
+                                                    name="newCreateExternalSpecialistPhoneNo" type="number"
+                                                    placeholder="">
+                                            </div>
+                                            <div class="half-row">
+                                                <label for="newCreateExternalSpecialistPassword">New External Specialist
+                                                    Password</label>
+                                                <input id="newCreateExternalSpecialistPassword"
+                                                    name="newCreateExternalSpecialistPassword" type="text"
+                                                    placeholder="">
+                                            </div>
+                                            <div class="half-row">
+                                                <label for="newCreateExternalSpecialistSpeciality">New External
+                                                    Specialist Speciality</label>
+                                                <select id="newCreateExternalSpecialistSpeciality"
+                                                    name="newCreateExternalSpecialistSpeciality">
+                                                    <!-- Add all problem types from database to select as items -->
+                                                    <?php $i = 0;
+                                                    foreach ($problemTypes as $problemType) { ?>
+                                                    <option <?=$i==0 ? "selected" : "" ?> value=
+                                                        <?= $problemType->ID ?>>
+                                                        <?= $problemType->Problem ?>
+                                                    </option>
+                                                    <?php if ($i == 0) $i++;
+                                                    } ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <!-- Textarea for description -->
+                                        <div class="full-row">
+                                            <label for="ticketDescription">Description</label>
+                                            <textarea id="ticketDescription" name="ticketDescription" type="text"
+                                                placeholder="" maxlength="255" required></textarea>
+                                        </div>
+                                        <!-- Dropdown list of software -->
+                                        <div class="software-input half-row">
+                                            <label for="softwareID">Software</label>
+                                            <select id="softwareID" name="softwareID">
+                                                <option selected value=0>Problem is not software related</option>
+                                                <!-- Add all software from database to select as items -->
+                                                <% for(x in queries[4]){
+                                                    %>
+                                                        <option value= <%=queries[4][x].ID%>>
+                                                          <%= queries[4][x].SoftwareName %>
+                                                        </option>
+                                                    <%
+                                                   } %>
+                                            </select>
+                                        </div>
+                                        <!-- Dropdown list of hardware -->
+                                        <div class="hardware-input half-row">
+                                            <label for="viewHardwareID">Hardware</label>
+                                            <select id="viewHardwareID" name="hardwareID">
+                                                <option value=0>Problem is not hardware related</option>
+                                                <!-- Add all hardware from database as items to select -->
+                                                <% for(query in queries[5]){
+                                                     %>
+                                                     <option value=<%= queries[5][query].ID %>>
+                                                    <%= queries[5][query].Make %>
+                                                    <%= queries[5][query].Device %>
+                                                </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Button group to either cancel or submit ticket -->
+                                <hr>
+                                <div class="modal-footer">
+                                    <button type="button" onclick="closeModal();" class="button-close-bottom"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" onclick="onCreateUserClick">Create ticket</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Table that contains tickets -->
+                <table class="table table-striked shadow">
+                    <thead>
+                        <!-- Table headers -->
+                        <tr>
+                            <th>PROBLEM TYPE</th>
+                            <th>TODO</th>
+                            <th>IN PROGRESS</th>
+                            <th>IN REVIEW</th>
+                            <th>RESOLVED</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- For each type of problem, generate a row -->
+                        <!-- makes problem type array adds all fo the problem types to the array to be used for the column names -->
+                        <% var problemType = []
+                            for(problem in queries[0]){
+                                if (!problemType.includes(queries[0][problem].TypeID)){
+
+                                        problemType.push(queries[0][problem].TypeID);
+                                }
+                            };
+                         for (var i =0; i <problemType.length;  i++ ) { %>
+                        <tr>
+                            <td scope="wrapper"style="text-align:center; "><b>
+                                <% problem_type = ""
+                                for(query in queries[1]){
+                                    if(queries[1][query].ID == problemType[i]){
+                                        problem_type = queries[1][query].Problem
+                                    }
+                                }%>
+                                <%=
+                                problem_type
+                                %>
+                            </b></th>
+                            <!-- For each state, generate tickets -->
+                            <%
+                                const states = ["TODO", "INPROGRESS", "INREVIEW", "RESOLVED"];
+                                states.forEach(state => {
+                                %>
+                            <td ondragover="onDragOver(event);" ondrop="onDrop(event);">
+                                <ul class="ticket-list" data-state="<%=state%>"
+                                    data-typeID="<%= problemType[i]%>">
+                                    <!-- For each ticket, display as card in relevant row and column -->
+                                    <% for(j in queries[0]){
+                                        if(queries[0][j].ReporterID == userid){<!--1== john smith get current user-->
+                                            if(queries[0][j].TicketState == state && queries[0][j].TypeID == problemType[i]){
+                                            %>
+                                    <li onclick="showTicket(<%=queries[0][j].ID%>)" class="ticket"
+                                        <% reporterName = ""
+                                                for(query in queries[2]){
+                                                    if(queries[2][query].ID == queries[0][j].ReporterID){
+                                                        reporterName = queries[2][query].FullName
+                                                    }
+                                                }%>
+                                                <% specialistName = ""
+                                                for(query in queries[2]){
+                                                    if(queries[2][query].ID == queries[0][j].AssignedSpecialistID){
+                                                        specialistName = queries[2][query].FullName
+                                                    }
+                                                }%>
+                                                // getting software Name:
+                                        <% software_name = ""
+                                        for(numb in queries[4]){
+                                            if(queries[4][numb].ID == queries[0][j].SoftwareID){
+                                                software_name = queries[4][numb].SoftwareName
+                                            }
+                                        } %>
+                                        <% hardware_name = ""
+                                        for(numb in queries[5]){
+                                            if(queries[5][numb].ID == queries[0][j].HardwareID){
+                                                hardware_name = queries[5][numb].Device + " " + queries[5][numb].Make
+                                            }
+                                        } %>
+                                        id="ticket<%=queries[0][j].ID%>" draggable="true" ondragstart="onDragStart(event);"
+                                        data-typeID="<%= problemType[i]%>"
+                                        data-state="<%=queries[0][j].TicketState%>"
+                                        data-ID="<%= queries[0][j].ID%>"
+                                        data-Description="<%= queries[0][j].TicketDescription ? queries[0][j].TicketDescription : '' %>"
+                                        data-Reporter="<%= queries[0][j].ReporterID ? queries[0][j].ReporterID : '' %>"
+                                        data-ReporterName="<%= reporterName ? reporterName : '' %>"
+                                        data-AssignedSpecialist="<%= queries[0][j].AssignedSpecialistID ? queries[0][j].AssignedSpecialistID : '' %>"
+                                        data-AssignedSpecialistName="<%= specialistName ? specialistName : '' %>"
+                                        data-software="<%= queries[0][j].SoftwareID %>"
+                                        data-softwareName="<%= software_name %>"
+                                        data-hardware="<%= queries[0][j].HardwareID %>"
+                                        data-hardwareName="<%= hardware_name %>"
+                                        data-finalSolution="<%= queries[0][j].FinalSolution%>"
+                                        data-Priority="<%=queries[0][j].TicketPriority%>"
+                                        data-createdTimestamp="<%= queries[0][j].CreatedTimestamp%>"
+                                        data-resolvedTimestamp="<%= queries[0][j].ResolvedTimestamp%>">
+                                        <div class="ticket-body">
+                                            <p class="ticket-id">
+                                                #<%=queries[0][j].ID%>
+                                            </p>
+                                            <hr>
+                                            <h4 class="ticket-reporter">
+                                                <!--get the name of the current logged in user-->
+                                                <% reporterName = ""
+                                                for(query in queries[2]){
+                                                    if(queries[2][query].ID == queries[0][j].ReporterID){
+                                                        reporterName = queries[2][query].FullName
+                                                    }
+                                                }%>
+                                                <%=
+                                                reporterName
+                                                %>
+                                            </h4>
+                                            <p class="ticket-description">
+                                                <%=queries[0][j].TicketDescription%>
+                                            </p>
+                                            <span class="ticket-priority" <% switch (queries[0][j].TicketPriority) {
+                                                case 1:%>
+                                                style="color:lightgreen">&#10122
+                                                <%break;
+                                                case 2:%>
+                                                style="color:greenyellow">&#10123
+                                                <%break;
+                                                case 3:%>
+                                                style="color:#f8d900">&#10124
+                                                <%break;
+                                                case 4:%>
+                                                style="color:orange">&#10125
+                                                <%break;
+                                                default:%>
+                                                style="color:red">&#10126
+                                                <%break;
+                                                }
+                                                %>
+                                            </span>
+                                        </div>
+                                    </li>
+                                    <% }
+                                }
+                                } %>
+                                </ul>
+                            </td>
+                            <% }); %>
+                        </tr>
+                        <% }; %>
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+
+    <!-- View ticket modal -->
+                <div id="view-ticket-modal" class="modal fade" tabindex="-1">
+                    <div class="modal-dialog">
+                        <form id="update-form" name="update-form" action="/ticket/update-form" method="POST"
+                            class="modal-form">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title">View ticket</h3>
+                                    <button type="button" onclick="closeModal();" class="modal-close button-close"
+                                        data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
+                                </div>
+                                <hr>
+                                <div class="modal-body">
+                                    <div class="wrapper">
+                                        <!-- Ticket ID (automatically generated so cannot be edited) -->
+                                        <div class="half-row">
+                                            <label for="viewID">Ticket ID</label>
+                                            <input id="viewID" name="ID" type="number" placeholder="" value="" required
+                                            readonly="readonly">
+                                        </div>
+                                        <!-- Created timestamp of the ticket (not editable) -->
+                                        <div class="half-row">
+                                            <label for="viewCreatedTimestamp">Created Timestamp</label>
+                                            <input id="viewCreatedTimestamp" name="createdTimestamp" type="text"
+                                                placeholder="" readonly="readonly">
+                                        </div>
+                                        <!-- Dropdown list of reporters -->
+                                        <div class="full-row">
+                                            <label for="viewReporterID">Reporter</label>
+                                            <div class="input-extended input-extended-right">
+                                                <select onchange="getPhoneNo(this);" id="viewReporterNo"
+                                                    name="reporterID" class="personnel-select "
+                                                    >
+                                                    <!-- Add all reporters from database as items to select -->
+                                                    <% for(query in queries[2]){ %>
+                                                    <option value= <%=queries[2][query].ID %>>
+                                                        <%= queries[2][query].FullName %>
+                                                    </option>
+                                                    <% } %>
+                                                </select>
+                                                <!-- Selected reporter phone number (not editable) -->
+                                                <label class="input-extension-right" for="reporterID"
+                                                    id="viewReporterNo"></label>
+                                            </div>
+                                        </div>
+                                        <!-- Dropdown list of specialist -->
+                                        <div class="full-row">
+                                            <label for="viewAssignedSpecialistID">Assigned Specialist</label>
+                                            <div class="input-extended input-extended-right">
+                                                <select onchange="getPhoneNo(this); addExternalSpecialist(this)"
+                                                    id="viewAssignedSpecialistID" name="assignedSpecialistID"
+                                                    class="personnel-select ">
+                                                    <option selected value=0>Not assigned</option>
+                                                    <!-- Add all specialists from database as items to select -->
+                                                    <% for(query in queries[3]){ %>
+                                                    <option value=<%= queries[3][query].PersonID;%>>
+                                                        <% for(number in queries[2]){
+                                                            if(queries[3][query].PersonID == queries[2][number].ID){
+                                                                fullName = queries[2][number].FullName;
+                                                            }
+                                                        }
+                                                        for(number in queries[1]){
+                                                            if(queries[3][query].SpecialtyID == queries[1][number].ID){
+                                                                problemName = queries[1][number].Problem;
+                                                            }
+                                                        }
+                                                        workload = 0;
+                                                        for(number in queries[0]){
+                                                            if(queries[3][query].PersonID == queries[0][number].AssignedSpecialistID){
+                                                                workload += 1;
+                                                            }
+                                                        }%>
+                                                        <%= queries[3][query].PersonID %>)
+                                                        <%= fullName %> - 
+                                                        <%= problemName %> -
+                                                        <%= workload %> 
+                                                        <%= queries[3][query].Externality ? ' (External)' : '' %>
+                                                    </option>
+                                                    <% }%>
+                                                </select>
+                                                <!-- Selected specialist phone number (not editable) -->
+                                                <label class="input-extension-right" for="specialistID"
+                                                    id="viewSpecialistNo"></label>
+                                            </div>
+                                        </div>
+                                        <!-- Dropdown list of priorities for the ticket -->
+                                        <div class="half-row">
+                                            <label for="viewTicketPriority">Priority</label>
+                                            <select id="viewPriority" name="ticketPriority">
+                                                <option value=1>1 (Lowest)</option>
+                                                <option value=2>2</option>
+                                                <option value=3>3</option>
+                                                <option value=4>4</option>
+                                                <option value=5>5 (Highest)</option>
+                                            </select>
+                                        </div>
+                                        <!-- Dropdown list of states for the ticket -->
+                                        <div class="half-row">
+                                            <label for="viewTicketState">State</label>
+                                            <select id="viewState" name="ticketState">
+                                                <option value="TODO">TODO</option>
+                                                <option value="INPROGRESS">IN PROGRESS</option>
+                                                <option value="INREVIEW">IN REVIEW</option>
+                                                <option value="RESOLVED">RESOLVED</option>
+                                            </select>
+                                        </div>
+                                        <!-- Dropdown list of problem types -->
+                                        <div class="half-row">
+                                            <!-- Need to include an option here for "other" and allow custom input -->
+                                            <label for="viewTypeID">Problem type</label>
+                                            <select onchange="addNewType(this);" id="viewTypeID" name="typeID">
+                                                <!-- Add all problem types from database as items to select -->
+                                                <% problem_type = ""
+                                                for(query in queries[1]){
+                                                    %>
+                                                <option value=<%=queries[1][query].ID%>>
+                                                    <%= queries[1][query].Problem %>
+                                                </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+                                        <!-- Text area for ticket description -->
+                                        <div class="full-row">
+                                            <label for="description">Description</label>
+                                            <textarea type="text" id="viewDescription" name="ticketDescription"
+                                                placeholder="" maxlength="255" required></textarea>
+                                        </div>
+                                        <!-- Dropdown list of software -->
+                                        <div class="software-input half-row">
+                                            <label for="viewSoftwareID">Software</label>
+                                            <select id="viewSoftwareID" name="softwareID">
+                                                <option value=0>Problem is not software related</option>
+                                                <!-- Add all software from database as items to select -->
+                                                <% for(query in queries[4]){
+                                                    %>
+                                                <option value=<%= queries[4][query].ID %>>
+                                                    <%= queries[4][query].SoftwareName %>
+                                                </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+                                        <!-- Dropdown list of hardware -->
+                                        <div class="hardware-input half-row">
+                                            <label for="viewHardwareID">Hardware</label>
+                                            <select id="viewHardwareID" name="hardwareID">
+                                                <option value=0>Problem is not hardware related</option>
+                                                <!-- Add all hardware from database as items to select -->
+                                                <% for(query in queries[5]){
+                                                     %>
+                                                     <option value=<%= queries[5][query].ID %>>
+                                                    <%= queries[5][query].Make %>
+                                                    <%= queries[5][query].Device %>
+                                                </option>
+                                                <% } %>
+                                            </select>
+                                        </div>
+                                        <!-- Text area for ticket solution -->
+                                        <div class="full-row">
+                                            <label for="viewFinalSolution">Solution</label>
+                                            <textarea type="text" id="viewFinalSolution" name="finalSolution"
+                                                placeholder="" maxlength="255"></textarea>
+                                        </div>
+                                        <!-- Resolved timestamp (not editable as automatically generated) -->
+                                        <div class="full-row">
+                                            <label for="viewResolvedTimestamp">Resolved Timestamp</label>
+                                            <input id="viewResolvedTimestamp" name="resolvedTimestamp" readonly="readonly"
+                                                type="text" placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Button group to either cancel or submit ticket -->
+                                <hr>
+                                <div class="modal-footer">
+                                    <button type="button" onclick="closeModal();"
+                                        class="modal-close button-close-bottom" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit">Update ticket</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+    </body>
+    <script src="javascripts/functions.js"></script>

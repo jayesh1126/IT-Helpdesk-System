@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="stylesheets/navbar.css">
+    <script src="javascripts/navbar.js"></script>
+    <style>
+      #user {
+        color: white;
+        text-shadow: 1px 1px 1px #ccc;
+        font-size: 3em;
+      }
+    </style>
+
+<div class="page-wrapper chiller-theme toggled">
+  <a id="show-sidebar" class="btn btn-sm btn-dark" href="#">
+    <i class="fas fa-bars"></i>
+  </a>
+  <nav id="sidebar" class="sidebar-wrapper">
+    <div class="sidebar-content">
+      <div class="sidebar-brand">
+        <a href="#">Make-It-All</a>
+        <div id="close-sidebar">
+          <i class="fas fa-times"></i>
+        </div>
+      </div>
+      <div class="sidebar-header">
+        <div class="user-pic">
+          <i id="user" class="fas fa-user"></i>
+
+        </div>
+        <div class="user-info">
+          <% const nameArr=locals.fullName.split(" ")%>
+          <span class="user-name"><%- nameArr[0] %>
+            <strong><%- nameArr[1] %></strong>
+          </span>
+          <%
+          if (locals.type==0){
+            role="User"
+          }
+          else if(locals.type==1){
+            role="Specialist"
+          }
+          else if(locals.type==2){
+            role="External Specialist"
+          }
+          else if(locals.type==3){
+            role="Administrator"
+          }
+          %>
+          <span class="user-role"><%- role%></span>
+        </div>
+      </div>
+>
+      <div class="sidebar-menu">
+        <ul >
+          <li class="header-menu">
+            <span>General</span>
+          </li>
+          <li id="ticketItem" >
+            <a href="ticket" >
+              <i class="fa fa-ticket-alt"></i>
+              <span>Tickets</span>
+            </a>
+          </li>
+          <li id="softwareItem">
+            <a href="software">
+              <i class="fas fa-upload"></i>
+              <span>Software</span>
+            </a>
+          </li>
+          <li id="hardwareItem">
+            <a href="hardware">
+              <i class="fas fa-desktop"></i>
+              <span>Hardware</span>
+            </a>
+
+          </li>
+          <li id="usersItem">
+            <a href="users">
+              <i class="fas fa-users"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li id="analyticsItem">
+            <a href="analytics">
+              <i class="fa fa-chart-line"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+         <li id="personnelItem">
+            <a href="personnel">
+              <i class="fa fa-book"></i>
+              <span>Personnel</span>
+            </a>
+          </li>
+          <li id="logoutItem">
+            <a href="login">
+              <i class="fa fa-arrow-left"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+</div>
+
+<script>
+  var type='<%-locals.type%>';
+  console.log(type)
+  if (type=='0'){
+    document.getElementById("softwareItem").children[0].style.display = "none"
+    document.getElementById("ticketItem").children[0].style.display = "none"
+    document.getElementById("hardwareItem").children[0].style.display = "none"
+    document.getElementById("analyticsItem").children[0].style.display = "none"
+    document.getElementById("personnelItem").children[0].style.display = "none"
+  }
+  else if (type=='1'){
+    document.getElementById("analyticsItem").children[0].style.display = "none"
+    document.getElementById("personnelItem").children[0].style.display = "none"
+  
+  }
+  else if (type=='2'){
+    document.getElementById("analyticsItem").children[0].style.display = "none"
+    document.getElementById("personnelItem").children[0].style.display = "none"
+  }
+  
+</script>
